@@ -4,7 +4,7 @@ import glob
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 from PIL import Image
 
@@ -52,7 +52,7 @@ class PivotCropper:
     root_dir: Union[str, Path]
 
     # Mapping of pivot to pivot group.
-    pivot_groups: dict[Pivot, List[Union[BBoxGroup, IndependentDir]]
+    pivot_groups: Dict[Pivot, List[Union[BBoxGroup, IndependentDir]]
                        ] = field(default_factory=dict)
 
     verbosity: log.Verbosity = log.Verbosity.INFO
