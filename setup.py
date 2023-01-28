@@ -32,6 +32,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],                                      # Information to filter the project on PyPi website
+    project_urls={"Source": "https://github.com/Katsutoshii/pivotcrop"},
     python_requires='>=3.7',                # Minimum version requirement of the package
     # Install other dependencies if any
     install_requires=REQUIREMENTS,
