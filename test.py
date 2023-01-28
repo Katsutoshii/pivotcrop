@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pivotcrop import PivotCropper, IndependentDir, BBoxGroup
+from pivotcrop import BBoxGroup, IndependentDir, PivotCropper
 
 
 def test_crop_images():

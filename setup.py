@@ -1,8 +1,8 @@
 import re
 from pathlib import Path
-import setuptools
-import pkg_resources as pkg
 
+import pkg_resources as pkg
+import setuptools
 
 FILE = Path(__file__).resolve()
 PARENT = FILE.parent  # root directory

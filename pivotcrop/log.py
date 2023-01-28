@@ -1,9 +1,13 @@
 """Basic CLI logging utils.
 """
+# pylint: disable=too-few-public-methods
+
+import sys
 from dataclasses import dataclass
 
 
 class Verbosity(int):
+    """Defines log verbosity settings."""
     ERROR = 0
     WARNING = 1
     INFO = 2
@@ -11,6 +15,7 @@ class Verbosity(int):
 
 
 class BColors:
+    """Defines colors for terminal text."""
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKCYAN = '\033[96m'
@@ -24,24 +29,30 @@ class BColors:
 
 @dataclass
 class Logger:
+    """Utility class for verbosity based logging."""
     verbosity: Verbosity = Verbosity.INFO
 
-    def debug(self, input: str):
-        if (self.verbosity >= Verbosity.DEBUG):
-            print(input)
+    def debug(self, msg: str):
+        """Debug message."""
+        if self.verbosity >= Verbosity.DEBUG:
+            print(msg)
 
-    def info(self, input: str):
-        if (self.verbosity >= Verbosity.INFO):
-            print(input)
+    def info(self, msg: str):
+        """Info message."""
+        if self.verbosity >= Verbosity.INFO:
+            print(msg)
 
-    def success(self, input: str):
-        if (self.verbosity >= Verbosity.INFO):
-            print(BColors.OKGREEN + input + BColors.ENDC)
+    def success(self, msg: str):
+        """Success message."""
+        if self.verbosity >= Verbosity.INFO:
+            print(BColors.OKGREEN + msg + BColors.ENDC)
 
-    def warning(self, input: str):
-        if (self.verbosity >= Verbosity.WARNING):
-            print(BColors.WARNING + input + BColors.ENDC)
+    def warning(self, msg: str):
+        """Warning message."""
+        if self.verbosity >= Verbosity.WARNING:
+            print(BColors.WARNING + msg + BColors.ENDC)
 
-    def error(self, input: str):
-        if (self.verbosity >= Verbosity.ERROR):
-            print(BColors.FAIL + input + BColors.ENDC)
+    def error(self, msg: str):
+        """Warning message."""
+        if self.verbosity >= Verbosity.ERROR:
+            print(BColors.FAIL + msg + BColors.ENDC, file=sys.stderr)
