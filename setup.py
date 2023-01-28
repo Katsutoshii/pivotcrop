@@ -12,7 +12,7 @@ REQUIREMENTS = [f'{x.name}{x.specifier}' for x in pkg.parse_requirements(
 
 
 def get_version():
-    file = PARENT / 'ultralytics/__init__.py'
+    file = PARENT / 'pivotcrop/__init__.py'
     return re.search(r'^__version__ = [\'"]([^\'"]*)[\'"]', file.read_text(encoding="utf-8"), re.M)[1]
 
 
@@ -20,11 +20,10 @@ setuptools.setup(
     name="pivotcrop",                     # This is the name of the package
     version="0.0.1",                        # The initial release version
     author="Josiah Putman",                     # Full name of the author
-    description="Quicksample Test Package for SQLShack Demo",
+    description="Package for cropping directories of images based on a pivot point.",
     # Long description read from the the readme file
     long_description=README,
     long_description_content_type="text/markdown",
-    # List of all python modules to be installed
     packages=setuptools.find_packages(),
     include_package_data=True,
     classifiers=[
@@ -36,6 +35,7 @@ setuptools.setup(
     python_requires='>=3.7',                # Minimum version requirement of the package
     # Install other dependencies if any
     install_requires=REQUIREMENTS,
+    url="https://github.com/Katsutoshii/pivotcrop",
     extras_require={
         'dev':
         ['check-manifest', 'pytest', 'pytest-cov', 'coverage', 'mkdocs', 'mkdocstrings[python]', 'mkdocs-material']},
