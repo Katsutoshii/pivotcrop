@@ -87,3 +87,13 @@ $$\text{Offset}_x  = \Delta \text{max}_x - \frac{\Delta \text{min}_x}{Pr_x}$$
 
 
 Same deal for the $y$ axis.
+
+
+## Development
+
+To publish to pip, use:
+
+```
+python setup.py sdist bdist_wheel
+python -m twine check dist/* && python -m twine upload dist/*
+```
