@@ -1,11 +1,11 @@
-"""Bounding box utils.
-"""
+"""Bounding box utils."""
+
 import glob
 import math
 from copy import copy
-from dataclasses import dataclass
+import dataclasses
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Self
 
 import numpy as np
 from PIL import Image
@@ -29,24 +29,24 @@ def round_up(v: int, n: int) -> int:
     return n * math.ceil(v / n)
 
 
-@dataclass
+@dataclasses.dataclass
 class BoundingBox:
     """Defines a minimal bounding box (trimming as much whitespace as possible) in an image."""
+
     min_x: int
     min_y: int
     max_x: int
     max_y: int
 
     @staticmethod
-    def from_image(image: Image) -> Optional["BoundingBox"]:
+    def from_image(image: Image) -> Self | None:
         """Constructs a bounding box from an image."""
         # `getbboxox` only trims the black border. Thus we must
         # first replace white border before computing the
         # bounding box.
         data = np.array(image)
         red, green, blue, alpha = data.T
-        white_areas = (red == 255) & (blue == 255) & (
-            green == 255) & (alpha == 0)
+        white_areas = (red == 255) & (blue == 255) & (green == 255) & (alpha == 0)
         # replace (255,255,255,0) with (0,0,0,0)
         data[..., :-1][white_areas.T] = (0, 0, 0)
         image = Image.fromarray(data)
@@ -57,7 +57,7 @@ class BoundingBox:
         min_x, min_y, max_x, max_y = img_result
         return BoundingBox(min_x, min_y, max_x, max_y)
 
-    def grow_to_fit(self, other: "BoundingBox"):
+    def grow_to_fit(self, other: Self):
         """Grow this bounding box to fit another."""
         self.min_x = min(other.min_x, self.min_x)
         self.min_y = min(other.min_y, self.min_y)
@@ -79,8 +79,8 @@ class BoundingBox:
         return image.crop((self.min_x, self.min_y, self.max_x, self.max_y))
 
     @staticmethod
-    def load_dirs(root_path: Path, input_dirs: List[str]) -> List[Optional["BoundingBox"]]:
-        """Loads image boundting boxes from the directory."""
+    def load_dirs(root_path: Path, input_dirs: List[str]) -> List[Optional[Self]]:
+        """Loads image bounding boxes from the directory."""
         bboxes: List[Optional[BoundingBox]] = []
 
         for input_dir in input_dirs:
@@ -92,11 +92,13 @@ class BoundingBox:
         return bboxes
 
     @staticmethod
-    def compose(bboxes: List[Optional["BoundingBox"]]) -> Optional["BoundingBox"]:
+    def compose(
+        bboxes: List[Self | None], round_to_num_pixels: int = 4
+    ) -> Optional[Self | None]:
         """Get the bounding box that covers all images in a directory and
         overwrites with a cropped version.
         """
-        total_bbox: Optional[BoundingBox] = None
+        total_bbox: BoundingBox | None = None
         for bbox in bboxes:
             if bbox is not None:
                 if total_bbox is None:
@@ -104,11 +106,13 @@ class BoundingBox:
                 else:
                     total_bbox.grow_to_fit(bbox)
 
-        total_bbox.round_bounds(4)
+        if round_to_num_pixels > 1:
+            total_bbox.round_bounds(round_to_num_pixels)
         return total_bbox
 
-    def resize_with_pivot(self,  pivot: Pivot,
-                          total_bbox: Optional["BoundingBox"] = None) -> "BoundingBox":
+    def resize_with_pivot(
+        self, pivot: Pivot, total_bbox: Self | None = None, round_to_num_pixels: int = 4
+    ) -> "BoundingBox":
         """Given a bounding box that is contained within `total_bbox`,
         Return `bbox` shrunk as much as possible while keeping `pivot` at
         the same relative location.
@@ -151,6 +155,7 @@ class BoundingBox:
                 offset_y = int(d_max_y - d_min_y / pivot_ratio_y)
                 adjusted_bbox.max_y += offset_y
 
-        adjusted_bbox.round_bounds(4)
+        if round_to_num_pixels > 1:
+            adjusted_bbox.round_bounds(round_to_num_pixels)
 
         return adjusted_bbox

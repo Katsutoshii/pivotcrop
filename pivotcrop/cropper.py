@@ -1,5 +1,5 @@
-"""Defines the main cropper class for pivot based cropping.
-"""
+"""Defines the main cropper class for pivot based cropping."""
+
 import glob
 import os
 from dataclasses import dataclass, field
@@ -11,7 +11,7 @@ from PIL import Image
 from pivotcrop import log
 from pivotcrop.bbox import BoundingBox
 from pivotcrop.draw import draw_square
-from pivotcrop.types import BBoxGroup, IndependentDir, Pivot, X, Y
+from pivotcrop.types import BBoxGroup, IndependentDir, Pivot, PivotGroup, X, Y
 
 
 # pylint: disable=too-many-instance-attributes
@@ -52,10 +52,9 @@ class PivotCropper:
     root_dir: Union[str, Path]
 
     # Mapping of pivot to pivot group.
-    pivot_groups: Dict[Pivot, List[Union[BBoxGroup, IndependentDir]]
-                       ] = field(default_factory=dict)
+    pivot_groups: Dict[Pivot, List[PivotGroup]] = field(default_factory=dict)
 
-    logger: log.Logger = field(default_factory=lambda:log.Logger(log.Verbosity.INFO))
+    logger: log.Logger = field(default_factory=lambda: log.Logger(log.Verbosity.INFO))
 
     # If true, plot the pivot point on the image.
     debug: bool = False
@@ -73,19 +72,30 @@ class PivotCropper:
                 if isinstance(group, BBoxGroup):
                     self.crop_group(group, pivot)
                 elif isinstance(group, IndependentDir):
-                    self.crop_dir(self.root_path / group, pivot)
+                    self.crop_dir(
+                        self.root_path / group.path,
+                        pivot,
+                        round_to_num_pixels=group.round_to_num_pixels,
+                    )
                 else:
                     self.logger.error(f"Malformed config: {group}")
 
-    def crop_image(self, image: Image.Image, pivot: Pivot,
-                   total_bbox: Optional[BoundingBox] = None) -> Optional[Image.Image]:
+    def crop_image(
+        self,
+        image: Image.Image,
+        pivot: Pivot,
+        total_bbox: Optional[BoundingBox] = None,
+        round_to_num_pixels: int = 4,
+    ) -> Optional[Image.Image]:
         """Crops a single image according to the given pivot."""
         bbox = BoundingBox.from_image(image)
         if bbox is None:
             self.logger.warning("WARNING: found empty image.")
             return None
 
-        adjusted_bbox: BoundingBox = bbox.resize_with_pivot(pivot, total_bbox)
+        adjusted_bbox: BoundingBox = bbox.resize_with_pivot(
+            pivot, total_bbox, round_to_num_pixels=round_to_num_pixels
+        )
         return adjusted_bbox.crop(image)
 
     def save_image(self, image: Image.Image, path: Path):
@@ -94,7 +104,13 @@ class PivotCropper:
         image.save(path)
         self.logger.info(f"     Saved to {path}")
 
-    def crop_dir(self, path: Path, pivot: Pivot, total_bbox: Optional[BoundingBox] = None):
+    def crop_dir(
+        self,
+        path: Path,
+        pivot: Pivot,
+        total_bbox: Optional[BoundingBox] = None,
+        round_to_num_pixels: int = 4,
+    ):
         """Crops an entire directory of images.
 
         If total_bbox is specified, then the directories share a max bounding box.
@@ -103,41 +119,52 @@ class PivotCropper:
         for infile in glob.glob(f"{path}/**/*.png", recursive=True):
             self.logger.info(f"    Cropping image {infile}")
             with Image.open(infile) as image:
-                cropped_image = self.crop_image(image, pivot, total_bbox)
+                cropped_image = self.crop_image(
+                    image,
+                    pivot,
+                    total_bbox,
+                    round_to_num_pixels=round_to_num_pixels,
+                )
                 if cropped_image is None:
                     continue
 
                 if self.debug:
                     self.debug_pivot(pivot, cropped_image)
 
-                outfile = (self.output_path /
-                           Path(infile).relative_to(self.root_path))
+                outfile = self.output_path / Path(infile).relative_to(self.root_path)
                 self.save_image(cropped_image, outfile)
 
                 if self.debug_memory:
                     initial_kb = os.path.getsize(infile) >> 10
                     cropped_kb = os.path.getsize(outfile) >> 10
                     self.logger.info(
-                        f"  Decreased image size from {initial_kb}KB to {cropped_kb}KB")
+                        f"  Decreased image size from {initial_kb}KB to {cropped_kb}KB"
+                    )
 
     def crop_group(self, bbox_group: BBoxGroup, pivot: Pivot):
         """Crops a gorup of directories all sharing the same total bounding box."""
 
         bbs: List[Optional[BoundingBox]] = BoundingBox.load_dirs(
-            self.root_path, bbox_group)
+            self.root_path, bbox_group.paths
+        )
         if len(bbs) == 0:
             self.logger.error("    Input directories had no .png files.")
             return
 
-        total_bb: Optional[BoundingBox] = BoundingBox.compose(bbs)
+        total_bb: Optional[BoundingBox] = BoundingBox.compose(
+            bbs, round_to_num_pixels=bbox_group.round_to_num_pixels
+        )
 
-        for input_dir in bbox_group:
-            self.crop_dir(self.root_path / input_dir, pivot, total_bb)
+        for input_dir in bbox_group.paths:
+            self.crop_dir(
+                self.root_path / input_dir,
+                pivot,
+                total_bb,
+                round_to_num_pixels=bbox_group.round_to_num_pixels,
+            )
 
     def debug_pivot(self, pivot: Pivot, image: Image.Image):
         """Debugs pivot selection by plotting it on the image."""
-        pivot_x = int(image.width *
-                      pivot[X])
+        pivot_x = int(image.width * pivot[X])
         pivot_y = int(image.height * pivot[Y])
-        draw_square(image,
-                    (pivot_x, pivot_y), radius=4)
+        draw_square(image, (pivot_x, pivot_y), radius=4)

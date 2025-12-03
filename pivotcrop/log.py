@@ -1,5 +1,5 @@
-"""Basic CLI logging utils.
-"""
+"""Basic CLI logging utils."""
+
 # pylint: disable=too-few-public-methods
 
 import sys
@@ -8,6 +8,7 @@ from dataclasses import dataclass
 
 class Verbosity(int):
     """Defines log verbosity settings."""
+
     ERROR = 0
     WARNING = 1
     INFO = 2
@@ -16,20 +17,22 @@ class Verbosity(int):
 
 class BColors:
     """Defines colors for terminal text."""
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 @dataclass
 class Logger:
     """Utility class for verbosity based logging."""
+
     verbosity: Verbosity = Verbosity.INFO
 
     def debug(self, msg: str):
