@@ -15,7 +15,9 @@ def test_crop_images():
     PivotCropper(
         output_dir="output/test_crop_images",
         root_dir="testdata",
-        pivot_groups={(0.5, 1): [BBoxGroup(["Motion/A"]), IndependentDir("Motion/B")]},
+        pivot_groups={
+            (0.5, 1): [BBoxGroup(["Motion/A"]), IndependentDir("Motion/B")]
+        },
     ).crop()
     assert Path("output/test_crop_images/Motion/A/Walk/Walk2a.png").exists()
     assert Path("output/test_crop_images/Motion/A/Walk/Walk3.png").exists()
@@ -41,12 +43,24 @@ def test_crop_images_no_rounding():
             ]
         },
     ).crop()
-    assert Path("output/test_crop_images_no_rounding/Motion/A/Walk/Walk2a.png").exists()
-    assert Path("output/test_crop_images_no_rounding/Motion/A/Walk/Walk3.png").exists()
-    assert Path("output/test_crop_images_no_rounding/Motion/A/Walk/Walk3a.png").exists()
-    assert Path("output/test_crop_images_no_rounding/Motion/B/Walk/Walk2a.png").exists()
-    assert Path("output/test_crop_images_no_rounding/Motion/B/Walk/Walk3.png").exists()
-    assert Path("output/test_crop_images_no_rounding/Motion/B/Walk/Walk3a.png").exists()
+    assert Path(
+        "output/test_crop_images_no_rounding/Motion/A/Walk/Walk2a.png"
+    ).exists()
+    assert Path(
+        "output/test_crop_images_no_rounding/Motion/A/Walk/Walk3.png"
+    ).exists()
+    assert Path(
+        "output/test_crop_images_no_rounding/Motion/A/Walk/Walk3a.png"
+    ).exists()
+    assert Path(
+        "output/test_crop_images_no_rounding/Motion/B/Walk/Walk2a.png"
+    ).exists()
+    assert Path(
+        "output/test_crop_images_no_rounding/Motion/B/Walk/Walk3.png"
+    ).exists()
+    assert Path(
+        "output/test_crop_images_no_rounding/Motion/B/Walk/Walk3a.png"
+    ).exists()
     assert Path(
         "output/test_crop_images_no_rounding/Motion/B/Walk/Walk10a.png"
     ).exists()

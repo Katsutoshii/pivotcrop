@@ -13,11 +13,13 @@ from pivotcrop.bbox import BoundingBox
 from pivotcrop.draw import draw_square
 from pivotcrop.types import BBoxGroup, IndependentDir, Pivot, PivotGroup, X, Y
 
+INFO = log.Verbosity.INFO
+
 
 # pylint: disable=too-many-instance-attributes
 @dataclass
 class PivotCropper:
-    """PivotCropper class that enables cropping iamges in directories based on a pivot point.
+    """PivotCropper class that enables cropping images around a pivot.
 
     Example usage:
     ```py
@@ -27,11 +29,13 @@ class PivotCropper:
         output_dir="output",
         root_dir="testdata",
         pivot_groups={
-            # All directories with images using pivot (0.5, 1) should be configured here.
+            # All directories with images using pivot (0.5, 1) should be
+            # configured here.
             (0.5, 1): [
                 # Two directories that should share the same bounding box.
                 BBoxGroup("Images/A", "Images/B"),
-                # Another directory using same pivot, but a different bounding box.
+                # Another directory using same pivot, but a different bounding
+                # box.
                 BBoxGroup("Images/C")
             ],
             # Entry with a different pivot
@@ -54,7 +58,7 @@ class PivotCropper:
     # Mapping of pivot to pivot group.
     pivot_groups: Dict[Pivot, List[PivotGroup]] = field(default_factory=dict)
 
-    logger: log.Logger = field(default_factory=lambda: log.Logger(log.Verbosity.INFO))
+    logger: log.Logger = field(default_factory=lambda: log.Logger(INFO))
 
     # If true, plot the pivot point on the image.
     debug: bool = False
@@ -99,7 +103,10 @@ class PivotCropper:
         return adjusted_bbox.crop(image)
 
     def save_image(self, image: Image.Image, path: Path):
-        """Saves an image at the given path, creating the parent dir if necessary."""
+        """Saves an image at the given path.
+
+        If necessary, creates the parent directory.
+        """
         path.parent.mkdir(parents=True, exist_ok=True)
         image.save(path)
         self.logger.info(f"     Saved to {path}")
@@ -113,7 +120,8 @@ class PivotCropper:
     ):
         """Crops an entire directory of images.
 
-        If total_bbox is specified, then the directories share a max bounding box.
+        If total_bbox is specified, then the directories share a max bounding
+        box.
         """
         self.logger.info(f"  Cropping images in directory {path}")
         for infile in glob.glob(f"{path}/**/*.png", recursive=True):
@@ -131,18 +139,20 @@ class PivotCropper:
                 if self.debug:
                     self.debug_pivot(pivot, cropped_image)
 
-                outfile = self.output_path / Path(infile).relative_to(self.root_path)
+                relative_path = Path(infile).relative_to(self.root_path)
+                outfile = self.output_path / relative_path
                 self.save_image(cropped_image, outfile)
 
                 if self.debug_memory:
                     initial_kb = os.path.getsize(infile) >> 10
                     cropped_kb = os.path.getsize(outfile) >> 10
                     self.logger.info(
-                        f"  Decreased image size from {initial_kb}KB to {cropped_kb}KB"
+                        f"  Decreased image size from {initial_kb}KB "
+                        + f"to {cropped_kb}KB"
                     )
 
     def crop_group(self, bbox_group: BBoxGroup, pivot: Pivot):
-        """Crops a gorup of directories all sharing the same total bounding box."""
+        """Crops a gorup of directories all sharing the same bounding box."""
 
         bbs: List[Optional[BoundingBox]] = BoundingBox.load_dirs(
             self.root_path, bbox_group.paths

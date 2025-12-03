@@ -3,10 +3,12 @@
 from PIL import Image
 from pivotcrop.types import Int2, Int4, X, Y
 
+DEFAULT_COLOR: Int4 = (255, 64, 64, 255)
+
 
 # pylint: disable=invalid-name
 def draw_square(
-    image: Image.Image, center: Int2, radius: int, color: Int4 = (255, 64, 64, 255)
+    image: Image.Image, center: Int2, radius: int, color: Int4 = DEFAULT_COLOR
 ):
     """Draw a square at the given point. Used for debugging."""
     for i in range(radius * 2):

@@ -1,11 +1,7 @@
 """Common types."""
 
-from typing import List, Tuple
+from typing import List, Tuple, TypeAlias
 import dataclasses
-
-
-class PivotGroup:
-    """Describes a group that has its own pivot."""
 
 
 @dataclasses.dataclass
@@ -29,7 +25,7 @@ class BBoxGroup(List[str]):
 
     def __post_init__(self):
         if not isinstance(self.paths, list):
-            self.paths = [paths]
+            self.paths = [self.paths]
 
 
 class Pivot(Tuple[float, float]):
@@ -41,7 +37,7 @@ class Pivot(Tuple[float, float]):
 Int2 = Tuple[int, int]
 Int4 = Tuple[int, int, int, int]
 
-PivotGroup = BBoxGroup | IndependentDir
+PivotGroup: TypeAlias = BBoxGroup | IndependentDir
 
 X: int = 0
 Y: int = 1

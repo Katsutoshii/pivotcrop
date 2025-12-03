@@ -31,7 +31,7 @@ def round_up(v: int, n: int) -> int:
 
 @dataclasses.dataclass
 class BoundingBox:
-    """Defines a minimal bounding box (trimming as much whitespace as possible) in an image."""
+    """Defines a minimal bounding box in an image."""
 
     min_x: int
     min_y: int
@@ -46,7 +46,9 @@ class BoundingBox:
         # bounding box.
         data = np.array(image)
         red, green, blue, alpha = data.T
-        white_areas = (red == 255) & (blue == 255) & (green == 255) & (alpha == 0)
+        white_areas = (
+            (red == 255) & (blue == 255) & (green == 255) & (alpha == 0)
+        )
         # replace (255,255,255,0) with (0,0,0,0)
         data[..., :-1][white_areas.T] = (0, 0, 0)
         image = Image.fromarray(data)
@@ -79,7 +81,7 @@ class BoundingBox:
         return image.crop((self.min_x, self.min_y, self.max_x, self.max_y))
 
     @staticmethod
-    def load_dirs(root_path: Path, input_dirs: List[str]) -> List[Optional[Self]]:
+    def load_dirs(root_path: Path, input_dirs: List[str]) -> List[Self | None]:
         """Loads image bounding boxes from the directory."""
         bboxes: List[Optional[BoundingBox]] = []
 
@@ -111,7 +113,10 @@ class BoundingBox:
         return total_bbox
 
     def resize_with_pivot(
-        self, pivot: Pivot, total_bbox: Self | None = None, round_to_num_pixels: int = 4
+        self,
+        pivot: Pivot,
+        total_bbox: Self | None = None,
+        round_to_num_pixels: int = 4,
     ) -> "BoundingBox":
         """Given a bounding box that is contained within `total_bbox`,
         Return `bbox` shrunk as much as possible while keeping `pivot` at
