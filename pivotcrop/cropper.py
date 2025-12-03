@@ -55,8 +55,7 @@ class PivotCropper:
     pivot_groups: Dict[Pivot, List[Union[BBoxGroup, IndependentDir]]
                        ] = field(default_factory=dict)
 
-    verbosity: log.Verbosity = log.Verbosity.INFO
-    logger: log.Logger = log.Logger(verbosity)
+    logger: log.Logger = field(default_factory=lambda:log.Logger(log.Verbosity.INFO))
 
     # If true, plot the pivot point on the image.
     debug: bool = False
