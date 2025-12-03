@@ -16,15 +16,17 @@ REQUIREMENTS = [
 def get_version():
     file = PARENT / "pivotcrop/__init__.py"
     return re.search(
-        r'^__version__ = [\'"]([^\'"]*)[\'"]', file.read_text(encoding="utf-8"), re.M
+        r'^__version__ = [\'"]([^\'"]*)[\'"]',
+        file.read_text(encoding="utf-8"),
+        re.M,
     )[1]
 
 
 setuptools.setup(
     name="pivotcrop",
-    version="0.1.0",
+    version="0.1.1",
     author="Josiah Putman",
-    description="Package for cropping directories of images based on a pivot point.",
+    description="Package for cropping directories of images based on a pivot.",
     long_description=README,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
@@ -35,7 +37,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     project_urls={"Source": "https://github.com/Katsutoshii/pivotcrop"},
-    python_requires=">=3.7",
+    python_requires=">=3.13",
     install_requires=REQUIREMENTS,
     url="https://github.com/Katsutoshii/pivotcrop",
     extras_require={
